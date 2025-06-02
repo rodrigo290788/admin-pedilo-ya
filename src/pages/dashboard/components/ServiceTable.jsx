@@ -77,7 +77,8 @@ const ServiceTable = () => {
     }
   };
 
-  const filtered = services.filter(service => {
+  const filtered = services
+  .filter(service => {
     const matchesSearch =
       service.fullName?.toLowerCase().includes(search.toLowerCase()) ||
       service.postTitle?.toLowerCase().includes(search.toLowerCase());
@@ -85,6 +86,26 @@ const ServiceTable = () => {
     if (key === 'active') return service.status === true && matchesSearch;
     if (key === 'inactive') return service.status === false && matchesSearch;
     return matchesSearch;
+  })
+  .sort((a, b) => {
+    const dateA = a.createdAt?.toDate?.() || null;
+    const dateB = b.createdAt?.toDate?.() || null;
+
+    // Si ambos tienen fecha
+    if (dateA && dateB) {
+      if (key === 'inactive') {
+        return dateA - dateB; // Más antiguos primero
+      } else if (key === 'active') {
+        return dateB - dateA; // Más recientes primero
+      }
+    }
+
+    // Si solo uno tiene fecha, lo ponemos antes
+    if (dateA && !dateB) return -1;
+    if (!dateA && dateB) return 1;
+
+    // Ninguno tiene fecha, no ordenar
+    return 0;
   });
 
   const totalCount = services.length;
